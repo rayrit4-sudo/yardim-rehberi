@@ -4,15 +4,18 @@
 #  3) Suresi biten basvurular kapatilir (update.js)
 #  4) Degisiklik varsa GitHub'a yuklenir ve Vercel'e gonderilir
 # Windows Gorev Zamanlayici her gun calistirir. Kayit: gunluk.log
-# -DryRun: yukleme ve yayin yapmaz, degisiklikleri loga yazip geri alir.  -SkipAgent: ajani calistirmaz.
+# -Ajan: yapay zeka ajanini calistirir. VARSAYILAN KAPALI: kullanici acikca izin verene kadar sadece 2-4. adimlar calisir.
+# -DryRun: yukleme ve yayin yapmaz, degisiklikleri loga yazip geri alir.
 # NOT: Bu dosyada Turkce karakter kullanma (Windows PowerShell 5.1 bozuyor).
-param([switch]$DryRun, [switch]$SkipAgent)
+param([switch]$DryRun, [switch]$Ajan)
+$SkipAgent = -not $Ajan
 $ErrorActionPreference = "Continue"
 Set-Location $PSScriptRoot
 $log = Join-Path $PSScriptRoot "gunluk.log"
 $MAKS_YENI = 5
 function Log($m) { "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $m" | Out-File -FilePath $log -Append -Encoding utf8 }
-function Geri-Al { & git checkout -- . 2>&1 | Out-Null }
+# Sadece betigin degistirdigi veri dosyalarini geri alir. Baska dosyalara (betigin kendisi dahil) dokunmaz.
+function Geri-Al { & git checkout -- data.js otomatik.js 2>&1 | Out-Null }
 function OtoSay { ([regex]::Matches((Get-Content otomatik.js -Raw -Encoding UTF8), '"otomatik":\s*true')).Count }
 
 Log "basladi$(if ($DryRun) { ' (DryRun)' })$(if ($SkipAgent) { ' (SkipAgent)' })"
@@ -36,9 +39,13 @@ if (-not $SkipAgent) {
   $degisen = @(& git status --porcelain | ForEach-Object { $_.Substring(3).Trim('"') })
   $yasak = @($degisen | Where-Object { $_ -ne "otomatik.js" })
   if ($yasak.Count -gt 0) {
-    Log "UYARI: ajan izin verilmeyen dosyalara dokundu: $($yasak -join ', '). Tum degisiklik geri aliniyor."
+    Log "UYARI: ajan izin verilmeyen dosyalara dokundu: $($yasak -join ', '). Bu dosyalar ve otomatik.js geri aliniyor."
     Geri-Al
-    foreach ($f in $yasak) { if (Test-Path $f) { $t = & git ls-files --error-unmatch $f 2>&1; if ($LASTEXITCODE -ne 0) { Remove-Item $f -Force -Recurse -ErrorAction SilentlyContinue } } }
+    foreach ($f in $yasak) {
+      & git ls-files --error-unmatch $f 2>&1 | Out-Null
+      if ($LASTEXITCODE -eq 0) { & git checkout -- $f 2>&1 | Out-Null }
+      elseif (Test-Path $f) { Remove-Item $f -Force -Recurse -ErrorAction SilentlyContinue }
+    }
   }
   # Guvenlik 2: gunluk ekleme siniri
   $eklenen = (OtoSay) - $once

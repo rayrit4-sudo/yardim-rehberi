@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hangi Yardıma Hakkım Var</title>
+<meta name="description" content="Türkiye'nin en büyük 20 ilinin belediye yardımları. Her yardımın resmi kaynağı ve tarihi yanında.">
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#1d2b24;--mut:#5d6b64;--line:#e2ded3;--acc:#1f6b4a;--accbg:#e4f1ea;--warn:#8a5a00;--warnbg:#fff3d6;--grey:#5d6b64;--greybg:#ecebe6;--open:#0b5d2e;--openbg:#cdeed9}
+@media (prefers-color-scheme:dark){:root{--bg:#121714;--card:#1b231f;--ink:#e9efe9;--mut:#9fada5;--line:#2c3832;--acc:#6fcf9f;--accbg:#1d3328;--warn:#f1c76a;--warnbg:#3a2f12;--grey:#9fada5;--greybg:#26302b;--open:#8ff0b6;--openbg:#17402a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow-wrap:anywhere}
+main{max-width:640px;margin:0 auto;padding:24px 16px 56px}
+h1{font-size:26px;line-height:1.2;margin:8px 0 6px}
+.sub{color:var(--mut);margin:0 0 20px}
+.step{margin:22px 0 10px;font-weight:600}
+select{width:100%;font-size:17px;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:12px 18px;font-size:17px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:#fff}
+@media (prefers-color-scheme:dark){.chip[aria-pressed=true]{color:#0c1a13}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+.card h3{margin:0 0 6px;font-size:18px}
+.tutar{font-weight:700;color:var(--acc);margin:0 0 8px}
+.tag{display:inline-block;font-size:13px;padding:2px 10px;border-radius:999px;margin-bottom:8px}
+.tag.acik{background:var(--openbg);color:var(--open);font-weight:700}
+.tag.guncel{background:var(--accbg);color:var(--acc)}
+.tag.kapali{background:var(--greybg);color:var(--grey)}
+.tag.eski{background:var(--warnbg);color:var(--warn)}
+p{margin:6px 0}
+details{margin-top:8px}
+summary{cursor:pointer;color:var(--acc);font-weight:600}
+.small{font-size:14px;color:var(--mut)}
+a{color:var(--acc)}
+.box{background:var(--warnbg);color:var(--warn);border-radius:12px;padding:12px 14px;margin:22px 0;font-size:15px}
+.acikbox{background:var(--openbg);color:var(--open);border-radius:12px;padding:12px 14px;margin:0 0 18px}
+.acikbox summary{color:var(--open)}
+.acikbox ul{margin:8px 0 0;padding-left:20px}
+.acikbox a{color:var(--open);font-weight:600}
+.empty{color:var(--mut);padding:18px 0}
+footer{margin-top:34px;font-size:14px;color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Hangi yardıma hakkım var?</h1>
+  <p class="sub">Türkiye'nin en büyük 20 ilinin belediye yardımları, resmi kaynağıyla.</p>
+
+  <div id="acikbox"></div>
+
+  <div class="step">1. Nerede yaşıyorsun?</div>
+  <select id="il" aria-label="İl seç"></select>
+
+  <div id="adim2" hidden>
+    <div class="step">2. Kimin için bakıyorsun?</div>
+    <div class="chips" id="kimler"></div>
+  </div>
+
+  <div id="sonuc"></div>
+
+  <div class="box"><b>Dolandırıcılara dikkat.</b> Yardım başvurusu için sana gelen SMS veya sosyal medya linklerine tıklama. Başvuruyu yalnızca burada yazan resmi adreslerden veya Alo 153'ten yap. Yardım için senden para istenmez.</div>
+
+  <footer>
+    Son kontrol: <span id="sk"></span>. Bu sayfa kurum değildir, karar vermez. Tutarlar ve şartlar değişebilir; başvurmadan önce kaynaktaki sayfadan veya Alo 153'ten teyit et.
+  </footer>
+</main>
+<script src="data.js"></script>
+<script>
+var KIM={emekli:"Emekli",cocuklu:"Çocuklu aile",ihtiyac:"Düşük gelirli aile",ogrenci:"Öğrenci / okul çağı",evli:"Evlenecek / yeni evli",engelli:"Engelli / bakım gerektiren"};
+var ETIKET={acik:"Başvuru açık",guncel:"2026 tarihli resmi kaynak",kapali:"Bu dönem kapandı, bir sonrakini takip et",eski:"2026'da teyit edilemedi"};
+var SIRA={acik:0,guncel:1,kapali:2,eski:3};
+var secIl="",secKim="";
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function ilAdi(k){return ILLER[k].ad}
+
+function drawAcik(){
+  var w=document.getElementById("acikbox");w.innerHTML="";
+  var l=YARDIMLAR.filter(function(y){return y.durum==="acik"});
+  if(!l.length)return;
+  var d=el("details","acikbox");d.open=true;
+  d.appendChild(el("summary",null,"Şu an başvurusu açık olanlar ("+l.length+")"));
+  var ul=el("ul");
+  l.forEach(function(y){
+    var li=el("li");
+    var a=el("a",null,ilAdi(y.il)+": "+y.ad);a.href="#"+y.il+"/"+y.kim[0];a.onclick=function(){setTimeout(readHash,0)};
+    li.appendChild(a);li.appendChild(document.createTextNode(" — son gün "+y.sonBasvuru));
+    ul.appendChild(li);
+  });
+  d.appendChild(ul);w.appendChild(d);
+}
+function drawIl(){
+  var s=document.getElementById("il");s.innerHTML="";
+  var o=el("option",null,"İl seç…");o.value="";s.appendChild(o);
+  Object.keys(ILLER).forEach(function(k){var op=el("option",null,ILLER[k].ad);op.value=k;s.appendChild(op)});
+  s.value=secIl;
+  s.onchange=function(){secIl=s.value;secKim="";drawKimler();drawSonuc();location.hash=secIl?secIl:""};
+}
+function kimlerOf(il){var set={};YARDIMLAR.forEach(function(y){if(y.il===il)y.kim.forEach(function(k){set[k]=1})});return Object.keys(KIM).filter(function(k){return set[k]})}
+function drawKimler(){
+  var s=document.getElementById("adim2");s.hidden=!secIl;
+  var w=document.getElementById("kimler");w.innerHTML="";
+  if(!secIl)return;
+  kimlerOf(secIl).forEach(function(k){
+    var b=el("button","chip",KIM[k]);b.type="button";b.setAttribute("aria-pressed",secKim===k?"true":"false");
+    b.onclick=function(){secKim=k;drawKimler();drawSonuc();location.hash=secIl+"/"+k};
+    w.appendChild(b);
+  });
+}
+function drawSonuc(){
+  var w=document.getElementById("sonuc");w.innerHTML="";
+  if(!secIl||!secKim)return;
+  var liste=YARDIMLAR.filter(function(y){return y.il===secIl&&y.kim.indexOf(secKim)>-1});
+  var il=ILLER[secIl];
+  w.appendChild(el("div","step",il.baslik+": "+liste.length+" yardım"));
+  if(!liste.length){w.appendChild(el("div","empty","Bu seçim için doğrulanmış bir yardım bulamadım. Alo 153'ten sorabilirsin."));return}
+  liste.sort(function(a,b){return SIRA[a.durum]-SIRA[b.durum]});
+  liste.forEach(function(y){
+    var c=el("div","card");
+    c.appendChild(el("span","tag "+y.durum,y.durum==="acik"?"Başvuru açık, son gün "+y.sonBasvuru:ETIKET[y.durum]));
+    c.appendChild(el("h3",null,y.ad));
+    c.appendChild(el("p","tutar",y.tutar));
+    c.appendChild(el("p",null,y.kime));
+    var d=el("details");d.appendChild(el("summary",null,"Nasıl başvururum?"));
+    d.appendChild(el("p",null,"Başvuru: "+y.basvuru));
+    if(y.belge)d.appendChild(el("p",null,"Belgeler: "+y.belge));
+    if(y.ozet)d.appendChild(el("p","small","Bu kaydı kaynak sayfayı doğrudan açamadan, resmi sitenin arama özetinden aldım. Başvurmadan önce sayfadan teyit et."));
+    if(y.not)d.appendChild(el("p","small","Not: "+y.not));
+    var p=el("p","small","Kaynak ("+y.kaynakTarih+"): ");var a=el("a",null,"resmi sayfa");a.href=y.kaynak;a.target="_blank";a.rel="noopener";p.appendChild(a);d.appendChild(p);
+    c.appendChild(d);w.appendChild(c);
+  });
+  w.appendChild(el("p","small","Genel başvuru: "+il.ortakBasvuru));
+}
+function readHash(){
+  try{var hp=location.hash.slice(1).split("/");secIl=ILLER[hp[0]]?hp[0]:"";secKim=(secIl&&KIM[hp[1]])?hp[1]:""}catch(e){}
+  drawIl();drawKimler();drawSonuc();
+}
+document.getElementById("sk").textContent=SON_KONTROL;
+drawAcik();readHash();
+window.addEventListener("hashchange",readHash);
+</script>
+</body>
+</html>

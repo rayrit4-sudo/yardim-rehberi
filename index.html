@@ -65,6 +65,10 @@ footer{margin-top:34px;font-size:14px;color:var(--mut)}
   </footer>
 </main>
 <script src="data.js"></script>
+<script src="otomatik.js"></script>
+<script>
+window.YARDIMLAR = window.YARDIMLAR.concat(window.OTOMATIK || []);
+</script>
 <script>
 var KIM={emekli:"Emekli",cocuklu:"Çocuklu aile",ihtiyac:"Düşük gelirli aile",ogrenci:"Öğrenci / okul çağı",evli:"Evlenecek / yeni evli",engelli:"Engelli / bakım gerektiren"};
 var ETIKET={acik:"Başvuru açık",guncel:"2026 tarihli resmi kaynak",kapali:"Bu dönem kapandı, bir sonrakini takip et",eski:"2026'da teyit edilemedi"};
@@ -123,6 +127,7 @@ function drawSonuc(){
     var d=el("details");d.appendChild(el("summary",null,"Nasıl başvururum?"));
     d.appendChild(el("p",null,"Başvuru: "+y.basvuru));
     if(y.belge)d.appendChild(el("p",null,"Belgeler: "+y.belge));
+    if(y.otomatik)d.appendChild(el("p","small","Bu kayıt "+y.eklemeTarihi+" tarihinde otomatik bulundu ve kaynak sayfadaki alıntıyla doğrulandı. Elle gözden geçirilmedi, başvurmadan önce kaynaktan teyit et."));
     if(y.ozet)d.appendChild(el("p","small","Bu kaydı kaynak sayfayı doğrudan açamadan, resmi sitenin arama özetinden aldım. Başvurmadan önce sayfadan teyit et."));
     if(y.not)d.appendChild(el("p","small","Not: "+y.not));
     var p=el("p","small","Kaynak ("+y.kaynakTarih+"): ");var a=el("a",null,"resmi sayfa");a.href=y.kaynak;a.target="_blank";a.rel="noopener";p.appendChild(a);d.appendChild(p);

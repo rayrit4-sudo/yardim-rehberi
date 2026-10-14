@@ -1,32 +1,77 @@
-# Gunluk bakim: suresi biten basvurulari kapatir, degisiklik varsa GitHub'a yukler ve Vercel'e gonderir.
+# Gunluk bakim:
+#  1) Yapay zeka ajani 20 belediyenin yeni yardim duyurularini arar ve otomatik.js'e ekler (ajan_gorev.md)
+#  2) Dogrulamayi gecemeyen otomatik kayitlar silinir (verify.js --sil), kurallara uymayan degisiklik geri alinir
+#  3) Suresi biten basvurular kapatilir (update.js)
+#  4) Degisiklik varsa GitHub'a yuklenir ve Vercel'e gonderilir
 # Windows Gorev Zamanlayici her gun calistirir. Kayit: gunluk.log
-# -DryRun: yukleme ve yayin yapmaz, sadece ne yapacagini yazar.
+# -DryRun: yukleme ve yayin yapmaz, degisiklikleri loga yazip geri alir.  -SkipAgent: ajani calistirmaz.
 # NOT: Bu dosyada Turkce karakter kullanma (Windows PowerShell 5.1 bozuyor).
-param([switch]$DryRun)
+param([switch]$DryRun, [switch]$SkipAgent)
 $ErrorActionPreference = "Continue"
 Set-Location $PSScriptRoot
 $log = Join-Path $PSScriptRoot "gunluk.log"
+$MAKS_YENI = 5
 function Log($m) { "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')  $m" | Out-File -FilePath $log -Append -Encoding utf8 }
+function Geri-Al { & git checkout -- . 2>&1 | Out-Null }
+function OtoSay { ([regex]::Matches((Get-Content otomatik.js -Raw -Encoding UTF8), '"otomatik":\s*true')).Count }
 
-Log "basladi$(if ($DryRun) { ' (DryRun)' })"
-$out = & node update.js 2>&1
-$kod = $LASTEXITCODE
-Log "update.js cikis=$kod  $out"
+Log "basladi$(if ($DryRun) { ' (DryRun)' })$(if ($SkipAgent) { ' (SkipAgent)' })"
+$once = OtoSay
 
-if ($kod -eq 10) {
-  & node check.js | Out-Null
-  if ($LASTEXITCODE -ne 0) {
-    Log "HATA: check.js basarisiz, yayin yapilmadi. data.js geri aliniyor."
-    & git checkout -- data.js
-    exit 1
+# ---- 1) Ajan ----
+if (-not $SkipAgent) {
+  $bugun = Get-Date -Format "yyyy-MM-dd"
+  $prompt = "Bugunun tarihi: $bugun. ajan_gorev.md dosyasini oku ve talimatlarina harfiyen uy."
+  $claude = (Get-Command claude -ErrorAction SilentlyContinue).Source
+  if (-not $claude) { Log "HATA: claude komutu bulunamadi, ajan atlandi." }
+  else {
+    $ozet = & $claude -p $prompt --model sonnet --permission-mode acceptEdits `
+      --allowedTools "WebSearch" "WebFetch" "Read" "Edit" "Bash(node sayfa.js *)" "Bash(node check.js*)" "Bash(node verify.js*)" `
+      --max-budget-usd 3 --output-format text 2>&1 | Out-String
+    Log "ajan cikis=$LASTEXITCODE"
+    Log ("ajan ozeti: " + (($ozet -replace "\s+", " ").Trim()))
   }
-  if ($DryRun) { Log "DryRun: commit, push ve yayin atlandi."; & git checkout -- data.js; exit 0 }
-  & git add data.js
-  & git -c user.name="rayrit4-sudo" -c user.email="ayritr8@gmail.com" commit -q -m "Gunluk bakim: suresi biten basvurular kapandi olarak isaretlendi"
-  & git push -q origin main 2>&1 | ForEach-Object { Log "git push: $_" }
-  $dep = & vercel deploy --prod --yes 2>&1 | Out-String
-  Log "vercel: $(($dep -split "`n" | Select-String 'Aliased|Error|error' | Select-Object -First 2) -join ' | ')"
-} else {
-  Log "degisiklik yok."
+
+  # Guvenlik 1: sadece otomatik.js degismis olmali
+  $degisen = @(& git status --porcelain | ForEach-Object { $_.Substring(3).Trim('"') })
+  $yasak = @($degisen | Where-Object { $_ -ne "otomatik.js" })
+  if ($yasak.Count -gt 0) {
+    Log "UYARI: ajan izin verilmeyen dosyalara dokundu: $($yasak -join ', '). Tum degisiklik geri aliniyor."
+    Geri-Al
+    foreach ($f in $yasak) { if (Test-Path $f) { $t = & git ls-files --error-unmatch $f 2>&1; if ($LASTEXITCODE -ne 0) { Remove-Item $f -Force -Recurse -ErrorAction SilentlyContinue } } }
+  }
+  # Guvenlik 2: gunluk ekleme siniri
+  $eklenen = (OtoSay) - $once
+  if ($eklenen -gt $MAKS_YENI) { Log "UYARI: ajan $eklenen kayit ekledi (sinir $MAKS_YENI). Geri aliniyor."; Geri-Al }
 }
+
+# ---- 2) Dogrulama (alinti sayfada var mi, tutar/tarih alintida var mi) ----
+$v = & node verify.js --sil 2>&1 | Out-String
+Log ("verify: " + (($v -replace "\s+", " ").Trim()))
+& node check.js 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) {
+  Log "HATA: check.js basarisiz. Degisiklikler geri aliniyor, yayin yok."
+  Log (& node check.js 2>&1 | Out-String)
+  Geri-Al; Log "bitti (hata)"; exit 1
+}
+
+# ---- 3) Suresi biten basvurulari kapat ----
+$u = & node update.js 2>&1 | Out-String
+Log ("update: " + (($u -replace "\s+", " ").Trim()))
+
+# ---- 4) Yayin ----
+$fark = (& git status --porcelain | Out-String).Trim()
+if (-not $fark) { Log "degisiklik yok."; Log "bitti"; exit 0 }
+& node check.js 2>&1 | Out-Null
+if ($LASTEXITCODE -ne 0) { Log "HATA: son check.js basarisiz, geri aliniyor."; Geri-Al; Log "bitti (hata)"; exit 1 }
+Log ("degisen dosyalar: " + ($fark -replace "\s+", " "))
+if ($DryRun) {
+  Log ("DryRun fark: " + ((& git diff -U0 | Out-String) -replace "\s+", " "))
+  Log "DryRun: commit, push ve yayin atlandi, geri aliniyor."; Geri-Al; Log "bitti"; exit 0
+}
+& git add -A
+& git -c user.name="rayrit4-sudo" -c user.email="ayritr8@gmail.com" commit -q -m "Gunluk bakim: yeni duyurular ve kapanan basvurular"
+& git push -q origin main 2>&1 | ForEach-Object { Log "git push: $_" }
+$dep = & vercel deploy --prod --yes 2>&1 | Out-String
+Log "vercel: $(($dep -split "`n" | Select-String 'Aliased|Error|error' | Select-Object -First 2) -join ' | ')"
 Log "bitti"

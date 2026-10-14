@@ -8,6 +8,16 @@
 // Son toplama tarihi: 2026-10-15
 window.SON_KONTROL = "15 Ekim 2026";
 
+// Bir ilin kaydının kaynağı SADECE bu alan adlarından olabilir (check.js zorlar).
+window.ALANLAR = {
+  istanbul: ["ibb.gov.tr", "ibb.istanbul"], ankara: ["ankara.bel.tr"], izmir: ["izmir.bel.tr"],
+  bursa: ["bursa.bel.tr"], antalya: ["antalya.bel.tr"], konya: ["konya.bel.tr"], adana: ["adana.bel.tr"],
+  sanliurfa: ["sanliurfa.bel.tr"], gaziantep: ["gaziantep.bel.tr"], kocaeli: ["kocaeli.bel.tr"],
+  mersin: ["mersin.bel.tr"], diyarbakir: ["diyarbakir.bel.tr"], hatay: ["hatay.bel.tr"], manisa: ["manisa.bel.tr"],
+  kayseri: ["kayseri.bel.tr"], samsun: ["samsun.bel.tr"], balikesir: ["balikesir.bel.tr"],
+  tekirdag: ["tekirdag.bel.tr"], aydin: ["aydin.bel.tr"], kahramanmaras: ["kahramanmaras.bel.tr"]
+};
+
 window.ILLER = {
   istanbul: { ad: "İstanbul", baslik: "İstanbul Büyükşehir Belediyesi", ortakBasvuru: "sosyalyardim.ibb.gov.tr, Alo 153, İstanbul Senin uygulaması veya WhatsApp 0552 153 00 34" },
   ankara:   { ad: "Ankara",   baslik: "Ankara Büyükşehir Belediyesi",   ortakBasvuru: "sosyalhizmetler.ankara.bel.tr veya Başkent 153. Çoğu destek için önce 'sosyal destek' kaydınızın olması gerekir." },

@@ -77,7 +77,7 @@ if ($DryRun) {
   Log "DryRun: commit, push ve yayin atlandi, geri aliniyor."; Geri-Al; Log "bitti"; exit 0
 }
 & git add -A
-& git -c user.name="rayrit4-sudo" -c user.email="ayritr8@gmail.com" commit -q -m "Gunluk bakim: yeni duyurular ve kapanan basvurular"
+& git -c user.name="rayrit4-sudo" -c user.email="rayrit4-sudo@users.noreply.github.com" commit -q -m "Gunluk bakim: yeni duyurular ve kapanan basvurular"
 & git push -q origin main 2>&1 | ForEach-Object { Log "git push: $_" }
 $dep = & vercel deploy --prod --yes 2>&1 | Out-String
 Log "vercel: $(($dep -split "`n" | Select-String 'Aliased|Error|error' | Select-Object -First 2) -join ' | ')"

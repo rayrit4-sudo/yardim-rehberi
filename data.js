@@ -216,7 +216,7 @@ window.YARDIMLAR = [
   { il: "kocaeli", kim: ["ogrenci", "cocuklu"], ad: "Eğitim Desteği 2026–2027",
     tutar: "İlkokul/ortaokul: 10.000 TL (Kasım'da 5.000 + Şubat'ta 5.000). Lise: ayda 2.000 TL, 9 ay (18.000 TL). Üniversite ve lisansüstü: ayda 3.000 TL, 10 ay (30.000 TL)", kime: "T.C. vatandaşı ihtiyaç sahibi öğrenciler. İlk/orta/lisede ailenin Kocaeli'de yaşaması ve devlet okulunda okuma (özel okul yalnızca %100 burslu). Üniversitede ailenin Kocaeli'de yaşaması ve 30 yaşından küçük olma. Şehit ve gazi çocukları şartsız.",
     basvuru: "kocaelibursu.com", belge: "",
-    kaynak: "https://www.kocaeli.bel.tr/haber/buyuksehirin-egitim-destegine-basvurular-basladi-52134.html", kaynakTarih: "4 Ekim 2026", durum: "acik", sonBasvuru: "16 Ekim 2026",
+    kaynak: "https://www.kocaeli.bel.tr/haber/buyuksehirin-egitim-destegine-basvurular-basladi-52134.html", kaynakTarih: "4 Ekim 2026", durum: "kapali", sonBasvuru: "16 Ekim 2026",
     not: "Ödemeler 41 Kart'a yatar. Gelir sınırı haberde yazmıyor. Toplam bütçe 650 milyon TL." },
   { il: "kocaeli", kim: ["ihtiyac"], ad: "41 Kart Gıda Destek Programı",
     tutar: "Tutar yayımlanmamış (hane büyüklüğüne ve gelire göre değişir)", kime: "Sosyal inceleme sonucunda ihtiyaç sahibi bulunan haneler. Hasta, yaşlı, engelli, dul ve yetim hanelere öncelik verilir.",

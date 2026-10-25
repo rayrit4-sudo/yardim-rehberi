@@ -255,7 +255,7 @@ window.YARDIMLAR = [
   { il: "diyarbakir", kim: ["ogrenci"], ad: "Üniversiteye ilk kez yerleşen öğrencilere eğitim desteği",
     tutar: "Toplam 25.000 TL (Kasım 2026'da 10.000 + Nisan 2027'de 15.000; bütçeye göre değişebilir)", kime: "2026 ÖSYM sonucuyla devlet üniversitesine (veya vakıf/özel üniversitede %100 burslu) ilk kez yerleşen, 21 Temmuz 2026'dan önce Diyarbakır'da yaşayan, 30 yaş ve altı, maddi desteğe ihtiyacı olan öğrenciler. Açıköğretim, uzaktan, akşam ve yurt dışı öğrenciler hariç.",
     basvuru: "egitimdestek.diyarbakir.bel.tr", belge: "Güncel öğrenci belgesi, adres geçmişi, hane listesi, ebeveynlerin son 6 aylık maaş bordrosu veya SGK dökümü, öğrenci adına IBAN",
-    kaynak: "https://diyarbakir.bel.tr/en/news/students-starting-university-for-the-first-time-to-receive-try-25000-in-education-support", kaynakTarih: "7 Ekim 2026", durum: "acik", sonBasvuru: "25 Ekim 2026",
+    kaynak: "https://diyarbakir.bel.tr/en/news/students-starting-university-for-the-first-time-to-receive-try-25000-in-education-support", kaynakTarih: "7 Ekim 2026", durum: "kapali", sonBasvuru: "25 Ekim 2026",
     not: "İlçe belediyesinden aynı yıl eğitim desteği alanlar başvuramaz." },
 
   // ---------- HATAY ----------

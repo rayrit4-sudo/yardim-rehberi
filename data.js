@@ -286,7 +286,7 @@ window.YARDIMLAR = [
   { il: "kayseri", kim: ["ogrenci"], ad: "Üniversiteli öğrenci ailelerine eğitim desteği",
     tutar: "Tek seferlik 10.000 TL (2026–2027)", kime: "Kayseri Büyükşehir sınırları içinde yaşayan, çocuğu üniversite okuyan düşük gelirli aileler. Başvuruyu veli yapar, aileden tek öğrenciye verilir. Açıköğretim, uzaktan, yüksek lisans/doktora, vakıf üniversitesinde ücretli okuyanlar ve sığınmacılar hariç.",
     basvuru: "kayseri.bel.tr → Online Hizmetler → 'Üniversitede Öğrencisi Okuyan Aile Yardımı Başvuru Formu' (yüz yüze başvuru yok)", belge: "",
-    kaynak: "https://www.kayseri.bel.tr/haberler/kayseri-buyuksehirin-10-bin-tllik-universite-desteginde-basvurular-basladi3304633046", kaynakTarih: "1 Ekim 2026", durum: "acik", sonBasvuru: "31 Ekim 2026 saat 17.00",
+    kaynak: "https://www.kayseri.bel.tr/haberler/kayseri-buyuksehirin-10-bin-tllik-universite-desteginde-basvurular-basladi3304633046", kaynakTarih: "1 Ekim 2026", durum: "kapali", sonBasvuru: "31 Ekim 2026 saat 17.00",
     not: "Gelir sınırı yazmıyor; kira, taşınmaz, araç, serbest meslek dahil tüm gelir hesaba katılıyor." },
   { il: "kayseri", kim: ["ogrenci", "cocuklu"], ad: "Kırtasiye ve beslenme desteği",
     tutar: "Öğrenci başına 5.000 TL (iki taksit: 1. dönem ve 2. dönem başı)", kime: "İlkokul, ortaokul ve lise öğrencisi olan, Kayseri'de yaşayan ve 3294 sayılı kanundaki muhtaçlık sınırına uyan aileler. 2026'da kişi başı aylık gelir 9.358 TL'nin altında olmalı (taşınmaz değerinin 1/240'ı, araç değerinin 1/120'si gelire eklenir).",
